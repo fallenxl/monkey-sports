@@ -15,8 +15,6 @@ export default function AuthGuard({ children, redirectTo = "/auth" }: AuthGuardP
   const router = useRouter();
 
   useEffect(() => {
-    console.log("AuthGuard: user", user);
-    console.log("AuthGuard: loading", loading);
     if (!loading && !user) {
       router.replace(redirectTo); // redirige si no hay usuario
 

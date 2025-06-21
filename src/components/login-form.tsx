@@ -28,17 +28,17 @@ export function LoginForm({
     toggleAuthMode
   } = useAuthForm();
 const [isLoading, setIsLoading] = useState(false);
+const [error, setError] = useState<string | null>(null);
   const handleSuccess = async () => {
     setIsLoading(true);
     const error = await handleSubmit();
     setIsLoading(false);
     if (error) {
-      console.error("Error during authentication:", error);
-      alert(error);
+      setError(error);
       return;
     }
     // Redirect to the home page after successful login or registration
-    router.push("/");
+    router.replace("/");
   }
 
   return (
@@ -52,6 +52,11 @@ const [isLoading, setIsLoading] = useState(false);
               ? "Ingresa tus credenciales para acceder a tu cuenta."
               : "Si eres termo o cagon no te registres."}
           </CardDescription>
+          {error && (
+            <div className="text-red-500 text-sm mt-2 bg-red-50 p-2 border-l-2 border-red-500 ">
+              {error}
+            </div>
+          )}
         </CardHeader>
         <CardContent>
           <form onSubmit={(e) => {

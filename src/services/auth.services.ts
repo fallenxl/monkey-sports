@@ -1,16 +1,29 @@
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "@/firebase";
+import { checkUsernameExists } from "./user.services";
 export async function registerUser({
   email,
   password,
+  confirmPassword,
   username,
 }: {
   email: string;
   password: string;
+  confirmPassword: string;
   username: string;
 }) {
-  // 1. Crear cuenta
+
+  if(password !== confirmPassword) {
+    throw new Error("Las contraseñas no coinciden.");
+  }
+
+  const usernameExists = await checkUsernameExists(username);
+  if (usernameExists) {
+    throw new Error("El nombre de usuario ya está en uso. Por favor, elige otro.");
+  }
+
+  
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
@@ -19,14 +32,16 @@ export async function registerUser({
 
   const user = userCredential.user;
 
-  // 2. Guardar nombre en perfil de usuario
   await updateProfile(user, { displayName: username });
 
-  // 3. Guardar en Firestore
   await setDoc(doc(db, "users", user.uid), {
-    uid: user.uid,
+    id: user.uid,
     email,
     username,
+    totalPoints: 0,
+    role: "USER", // USER || ADMIN
+    name: "", // Puedes agregar un campo de nombre si lo deseas
+    avatar: `https://api.dicebear.com/9.x/initials/svg?seed=${username}`,
     createdAt: serverTimestamp(),
   });
 
@@ -52,7 +67,7 @@ export async function loginUser({
     };
   } catch (error: any) {
     // Captura errores comunes
-    let message = "Error al iniciar sesión.";
+    let message = "Usuario o contraseña incorrectos.";
     if (error.code === "auth/user-not-found") message = "Usuario no encontrado.";
     if (error.code === "auth/wrong-password") message = "Contraseña incorrecta.";
     if (error.code === "auth/invalid-email") message = "Email inválido.";

@@ -70,7 +70,7 @@ export function useAuthForm() {
         const errorMessage = err.response.data.error || "Error al procesar la solicitud";
         return errorMessage;
       } else {
-        return "Error de autenticación desconocido";
+        return err instanceof Error ? err.message : "Error desconocido";
       }
     }
   };
