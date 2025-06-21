@@ -1,26 +1,48 @@
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+"use client";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [authMode, setAuthMode] = useState<"login" | "signup">("login");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const auth = params.get("m");
+    setAuthMode(auth === "signup" ? "signup" : "login");
+  }, []);
+
+  const toggleAuthMode = () => {
+    const newAuthMode = authMode === "login" ? "signup" : "login";
+    setAuthMode(newAuthMode);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("m", newAuthMode);
+      window.history.pushState({}, "", url.toString());
+    }
+  };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>{authMode === "login" ? "Iniciar Sesión" : "Registrarse"}</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            {authMode === "login"
+              ? "Ingresa tus credenciales para acceder a tu cuenta."
+              : "Si eres termo o cagon no te registres."}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -35,36 +57,57 @@ export function LoginForm({
                   required
                 />
               </div>
+              {
+                authMode === "signup" && (
+                  <div className="grid gap-3">
+                    <Label htmlFor="username">Nombre de Usuario</Label>
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Tu nombre de usuario"
+                      required
+                    />
+                  </div>
+                )
+              }
               <div className="grid gap-3">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                  <a
-                    href="#"
-                    className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
+                  <Label htmlFor="password">Contraseña</Label>
                 </div>
-                <Input id="password" type="password" required />
+                <Input placeholder="********" id="password" type="password" required />
               </div>
+              {authMode === "signup" && (
+                <>
+  
+                  <div className="grid gap-3">
+                    <Label htmlFor="confirm-password">Confirmar Contraseña</Label>
+                    <Input 
+                    placeholder="********"
+                    id="confirm-password" type="password" required />
+                  </div>
+                </>
+              )}
+              
               <div className="flex flex-col gap-3">
                 <Button type="submit" className="w-full">
-                  Login
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Login with Google
+                  {authMode === "login" ? "Iniciar Sesión" : "Registrarse"}
                 </Button>
               </div>
             </div>
             <div className="mt-4 text-center text-sm">
-              Don&apos;t have an account?{" "}
-              <a href="#" className="underline underline-offset-4">
-                Sign up
-              </a>
+             {authMode === "login" && <><span className="font-bold">¿No tienes una cuenta?</span><br/> Me vale verga, pero si quieres regístrate {" "}</>}
+             {authMode === "signup" && <><span className="font-bold">¿Ya tienes una cuenta?</span><br/> Me vale verga, pero si quieres inicia sesión {" "}</>}
+              <button
+                type="button"
+                onClick={toggleAuthMode}
+                className="text-neutral-700 font-bold underline hover:text-neutral-900 cursor-pointer"
+              >
+                {authMode === "login" ? "Registrarse" : "Iniciar Sesión"}
+              </button>
             </div>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
