@@ -11,8 +11,9 @@ export function useAuthForm() {
     username: "",
     confirmPassword: "",
   });
-
-  const action = authMode === "signup" ? "/api/auth/register" : "/api/auth/login";
+  const [error, setError] = useState<string | null>(null);
+  const action =
+    authMode === "signup" ? "/api/auth/register" : "/api/auth/login";
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -50,10 +51,13 @@ export function useAuthForm() {
     }));
   };
 
-  const handleSubmit = async () => {
-    if (authMode === "signup" && formData.password !== formData.confirmPassword) {
-      alert("Las contraseñas no coinciden");
-      return;
+  const handleSubmit = async (): Promise<string | undefined> => {
+    if (
+      authMode === "signup" &&
+      formData.password !== formData.confirmPassword
+    ) {
+    
+        return "Las contraseñas no coinciden";
     }
 
     const data =
@@ -65,12 +69,16 @@ export function useAuthForm() {
       const res = await axios.post(action, data, {
         headers: { "Content-Type": "application/json" },
       });
-      if (res.status === 201) alert("Operación exitosa: " + res.data.message);
+      if (res.status === 201) {
+        
+        return undefined; // Indica éxito
+      }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
-        alert("Error: " + err.response.data.error);
+        const errorMessage = err.response.data.error || "Error al procesar la solicitud";
+        return errorMessage;
       } else {
-        alert("Error inesperado");
+        return "Error de autenticación desconocido";
       }
     }
   };
@@ -78,6 +86,7 @@ export function useAuthForm() {
   return {
     authMode,
     formData,
+    error,
     handleChange,
     toggleAuthMode,
     handleSubmit,

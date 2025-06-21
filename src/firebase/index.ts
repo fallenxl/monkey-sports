@@ -19,3 +19,5 @@ const firebaseConfig: FirebaseConfig = {
     auth
 };
 export default firebaseConfig;
+export type { FirebaseConfig };
+export { app, db, auth };

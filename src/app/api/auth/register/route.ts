@@ -1,3 +1,5 @@
+import { registerUser } from "@/services/auth.services";
+import { checkUsernameExists } from "@/services/user.services";
 import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
@@ -21,11 +23,24 @@ export async function POST(request: Request) {
         { status: 400 }
       );
     }
-    return NextResponse.json({ message: "User registered successfully" }, { status: 201 });
+    // Check if the username already exists
+    const usernameExists = await checkUsernameExists(username);
+    if (usernameExists) {
+      return NextResponse.json(
+        { error: "Username already exists" },
+        { status: 400 }
+      );
+    }
+    const user = await registerUser({
+      email,
+        password,
+        username,
+    });
+    return NextResponse.json({ message: "User registered successfully", user }, { status: 201 });
   } catch (error) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { error: "Internal server error" },
+      { error: "El registro ha fallado, puede que el usuario ya exista" },
       { status: 500 }
     );
   }

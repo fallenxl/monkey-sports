@@ -11,18 +11,31 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthForm } from "@/hooks/useAuthForm";
+import { useRouter } from "next/navigation";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const router = useRouter();
   const {
     authMode,
     formData,
     handleChange,
     handleSubmit,
-    toggleAuthMode,
+    toggleAuthMode
   } = useAuthForm();
+
+  const handleSuccess = async () => {
+    const error = await handleSubmit();
+    if (error) {
+      console.error("Error during authentication:", error);
+      alert(error);
+      return;
+    }
+    // Redirect to the home page after successful login or registration
+    router.push("/");
+  }
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -38,7 +51,7 @@ export function LoginForm({
         <CardContent>
           <form onSubmit={(e) => {
             e.preventDefault();
-            handleSubmit();
+            handleSuccess();
           }}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
