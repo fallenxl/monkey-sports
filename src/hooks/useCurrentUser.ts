@@ -1,4 +1,4 @@
-// hooks/useCurrentUser.ts
+"use client"
 import { useEffect, useState } from "react";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebase";
@@ -8,12 +8,11 @@ export function useCurrentUser() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    auth.onAuthStateChanged(async (firebaseUser) => {
+      console.log("useCurrentUser: firebaseUser", firebaseUser);
       setUser(firebaseUser);
       setLoading(false);
     });
-
-    return () => unsubscribe(); 
   }, []);
 
   return { user, loading };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { loginUser, registerUser } from "@/services/auth.services";
 
 type AuthMode = "login" | "signup";
 
@@ -12,9 +13,6 @@ export function useAuthForm() {
     confirmPassword: "",
   });
   const [error, setError] = useState<string | null>(null);
-  const action =
-    authMode === "signup" ? "/api/auth/register" : "/api/auth/login";
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const m = params.get("m");
@@ -59,20 +57,14 @@ export function useAuthForm() {
     
         return "Las contraseñas no coinciden";
     }
-
-    const data =
-      authMode === "login"
-        ? { email: formData.email, password: formData.password }
-        : formData;
-
     try {
-      const res = await axios.post(action, data, {
-        headers: { "Content-Type": "application/json" },
-      });
-      if (res.status === 201) {
-        
-        return undefined; // Indica éxito
+      const user = authMode === "login"? 
+      await loginUser({email: formData.email, password: formData.password}) :
+      await registerUser(formData);
+      if (!user) {
+        return "Usuario o contraseña incorrectos";
       }
+      return undefined; // Indica que no hubo error
     } catch (err) {
       if (axios.isAxiosError(err) && err.response) {
         const errorMessage = err.response.data.error || "Error al procesar la solicitud";

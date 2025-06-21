@@ -12,6 +12,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuthForm } from "@/hooks/useAuthForm";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { LoadingPage } from "./loading-page";
 
 export function LoginForm({
   className,
@@ -25,9 +27,11 @@ export function LoginForm({
     handleSubmit,
     toggleAuthMode
   } = useAuthForm();
-
+const [isLoading, setIsLoading] = useState(false);
   const handleSuccess = async () => {
+    setIsLoading(true);
     const error = await handleSubmit();
+    setIsLoading(false);
     if (error) {
       console.error("Error during authentication:", error);
       alert(error);
@@ -39,6 +43,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
+      {        isLoading && <LoadingPage className="opacity-60" />}
       <Card>
         <CardHeader>
           <CardTitle>{authMode === "login" ? "Iniciar Sesión" : "Registrarse"}</CardTitle>
